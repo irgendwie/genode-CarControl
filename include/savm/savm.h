@@ -11,8 +11,8 @@ class savm : public mosqpp::mosquittopp
 	private:
 	/* mosquitto */
 	char host[16];
-	const char* id = "mbl_client";
-	const char* topic = "rcar/control/motor/+";
+	const char* id = "savm";
+	const char* topic = "ecu/acc/#";
 	int port;
 	int keepalive;
 
@@ -28,6 +28,6 @@ class savm : public mosqpp::mosquittopp
 	void myPublish(char *type, char *value);
 
 	public:
-	savm();
+	savm(const char* id);
 	~savm();
 };

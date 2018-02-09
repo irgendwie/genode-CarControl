@@ -33,7 +33,7 @@ if {[expr !$use_usb_driver && !$use_nic_driver]} {
 set build_components {
 	core init
 	drivers/timer drivers/nic
-	app/savm
+	app/acc
 }
 
 lappend_if $use_usb_driver              build_components drivers/usb
@@ -70,7 +70,7 @@ set config {
 		<resource name="RAM" quantum="1M"/>
 		<provides> <service name="Timer"/> </provides>
 	</start>
-	<start name="savm">
+	<start name="acc">
 		<resource name="RAM" quantum="5M"/>
 		<config>
 			<mosquitto ip-address="10.200.40.10" />
@@ -117,7 +117,7 @@ install_config $config
 set boot_modules {
 	core init timer
 	ld.lib.so libc.lib.so lwip.lib.so libm.lib.so libmosquitto.lib.so pthread.lib.so stdcxx.lib.so libssl.lib.so libcrypto.lib.so libprotobuf.lib.so zlib.lib.so
-	savm
+	acc
 }
 
 # platform-specific modules
@@ -136,7 +136,7 @@ build_boot_image $boot_modules
 # qemu config
 append qemu_args " -m 128 -nographic "
 
-append qemu_args " -net nic,macaddr=02:00:00:00:01:01 "
+append qemu_args " -net nic,macaddr=02:00:00:00:01:02 "
 
 append_if [have_spec x86]     qemu_args " -net nic,model=e1000 "
 append_if [have_spec lan9118] qemu_args " -net nic,model=lan9118 "

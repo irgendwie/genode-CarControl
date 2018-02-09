@@ -1,5 +1,5 @@
 #include <base/component.h>
-#include <savm/savm.h>
+#include <acc/acc.h>
 #include <nic/packet_allocator.h>
 #include <lwip/genode.h>
 extern "C" {
@@ -13,7 +13,7 @@ void Component::construct(Genode::Env &)
 {
 	enum { BUF_SIZE = Nic::Packet_allocator::DEFAULT_PACKET_SIZE * 128 };
 	
-	char ip_address[16] = "10.200.40.11";
+	char ip_address[16] = "10.200.40.12";
 	char subnet[16] = "10.255.255.255";
 	char gateway[16] = "10.200.40.10";
 
@@ -23,5 +23,5 @@ void Component::construct(Genode::Env &)
 				  BUF_SIZE,
 				  BUF_SIZE);
 				  
-	savm savm("savm");
+	acc acc("acc");
 }

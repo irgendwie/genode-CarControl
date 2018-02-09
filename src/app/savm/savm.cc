@@ -28,9 +28,9 @@ void savm::readAllBytes(void *buf, int socket, unsigned int size) {
 	} while(offset != size);
 }
 
-savm::savm() : mosquittopp(this->id)
+savm::savm(const char *id) : mosquittopp(id)
 {
-	sem_init(&allValSem, 0, 1);
+	sem_init(&allValSem, 0, 0);
 	mosqpp::lib_init();  /* initialize mosquitto library */
 
 	/* configure mosquitto library */
@@ -94,6 +94,7 @@ savm::savm() : mosquittopp(this->id)
 	protobuf::SensorDataOut sdo;
 	protobuf::SensorDataOut_vec2 vec2;
 	char val[512];
+	int num = 0;
 	while(true) {
 		uint32_t msg_len;
 		readAllBytes(&msg_len, sock, sizeof(msg_len));
@@ -161,8 +162,9 @@ savm::savm() : mosquittopp(this->id)
 		/*******************
 		 ** CommandDataIn **
 		 *******************/
-		while(allValues != 7) {
-		}
+		/* wait for data */
+		sem_wait(&allValSem);
+
 		msg_len = 0;
 		std::string cdi_str;
 		cdi.SerializeToString(&cdi_str);
@@ -188,16 +190,16 @@ savm::savm() : mosquittopp(this->id)
 						  " vs. ",
 						  msg_len);
 		}
-		sem_wait(&allValSem);
-		allValues = 0;
-		sem_post(&allValSem);
+
+		num++;
+		Genode::log("successful loop number: ", num);
 	}
 }
 
 void savm::myPublish(char *type, char *value) {
 	char topic[1024];
 	strcpy(topic, "savm/car/0/");
-	strcpy(topic, type);
+	strncat(topic, type, sizeof(topic));
 	publish(NULL, topic, strlen(value), value);
 }
 
@@ -225,10 +227,13 @@ void savm::on_message(const struct mosquitto_message *message)
 		cdi.set_gear(atoi(value));
 	} else {
 		Genode::log("unknown topic: ", (const char *)message->topic);
+		return;
 	}
-	sem_wait(&allValSem);
-	allValues++;
-	sem_post(&allValSem);
+
+	allValues = (allValues + 1) % 7;
+	if (!allValues) {
+		sem_post(&allValSem);
+	}
 }
 
 void savm::on_connect(int rc)
