@@ -1,4 +1,10 @@
 #include <mosquittopp.h>
+#include <savm/SensorDataOut.pb.h>
+#include <savm/CommandDataIn.pb.h>
+#include <semaphore.h>
+
+/* fix redefinition of struct timeval */
+#define timeval _timeval
 
 class savm : public mosqpp::mosquittopp
 {
@@ -10,9 +16,16 @@ class savm : public mosqpp::mosquittopp
 	int port;
 	int keepalive;
 
+	protobuf::CommandDataIn cdi;
+	int allValues;
+	sem_t allValSem;
+
 	void on_connect(int rc);
 	void on_disconnect(int rc);
 	void on_message(const struct mosquitto_message *message);
+
+	void readAllBytes(void *buf, int socket, unsigned int size);
+	void myPublish(char *type, char *value);
 
 	public:
 	savm();

@@ -1,4 +1,4 @@
 TARGET = savm
-SRC_CC = main.cc savm.cc
-LIBS += base libmosquitto stdcxx lwip
-#INC_DIR += $(call select_from_repositories,include/lwip)
+SRC_CC = main.cc savm.cc SensorDataOut.pb.cc CommandDataIn.pb.cc
+INC_DIR += $(REP_DIR)/include/savm/
+LIBS += base libmosquitto stdcxx lwip libprotobuf pthread
