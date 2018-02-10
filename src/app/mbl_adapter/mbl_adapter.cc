@@ -4,8 +4,9 @@
 #include <os/config.h>
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
 
-mbl_adapter::mbl_adapter()
+mbl_adapter::mbl_adapter(const char* id) : mosquittopp(id)
 {
 	mosqpp::lib_init();  /* initialize mosquitto library */
 
@@ -33,18 +34,54 @@ mbl_adapter::mbl_adapter()
 	} while(ret != MOSQ_ERR_SUCCESS);
 
 	/* subscribe to topic */
-	subscribe(NULL, topic);
+	do {
+		ret = this->subscribe(NULL, topic);
+		switch(ret) {
+		case MOSQ_ERR_INVAL:
+			Genode::error("invalid parameter for mosquitto subscribe");
+			return;
+		case MOSQ_ERR_NOMEM:
+			Genode::error("out of memory condition occurred");
+			return;
+		case MOSQ_ERR_NO_CONN:
+			Genode::error("not connected to a broker");
+			return;
+		}
+	} while(ret != MOSQ_ERR_SUCCESS);
 
 	/* start blocking loop */
 	loop_forever();
 }
 
+mbl_adapter::~mbl_adapter() {
+}
+
 void mbl_adapter::on_message(const struct mosquitto_message *message)
 {
-	if (strstr(message->topic, "speed")) {
-		/* TODO conversion + publish to mbl_client */
+	/* split type from topic */
+	char *type = strrchr(message->topic, '/') + 1;
+	/* get pointer to payload for convenience */
+	char *value = (char *)message->payload;
+
+	if (!strcmp(type, "enginerpm")) {
+		/* ignore enginerpm if we don't have a maximum yet */
+		if (rpmMax == 0.0) {
+			return;
+		}
+		/* convert and publish powerpct */
+		float rpm = atof(value);
+		char powerpct[4] = { '\0' };
+
+		if (rpm == 0.0) {
+			snprintf(powerpct, sizeof(powerpct), "%d", 0);
+		} else {
+			snprintf(powerpct, sizeof(powerpct), "%d", (int)(PCT_MIN + (rpm / (rpmMax / ((PCT_MAX - PCT_MIN) / PCT_STEP)))));
+		}
+		publish(NULL, "rcar/control/motor/powerpct", strlen(powerpct), powerpct);
+	} else if (!strcmp(type, "enginerpmMax")) {
+		this->rpmMax = atof(value);
 	} else {
-		Genode::log("unknown topic: ", (void *)message->topic);
+		//Genode::log("unknown topic: ", (const char *)message->topic);
 	}
 }
 

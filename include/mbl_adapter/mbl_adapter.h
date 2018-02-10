@@ -2,23 +2,26 @@
 
 class mbl_adapter : public mosqpp::mosquittopp
 {
-	private:
+private:
 	/* mosquitto */
 	char host[16];
 	const char* id = "mbl_adapter";
-	const char* topic = "simulation/car/1/#";
+	const char* topic = "savm/car/0/+";
 	int port;
 	int keepalive;
 	enum {
-		VEL_OFF  = 0,
-		VEL_STEP = 1,
-		VEL_MIN  = 10,
-		VEL_MAX  = 30,
+		PCT_OFF  = 0,
+		PCT_STEP = 1,
+		PCT_MIN  = 10,
+		PCT_MAX  = 30,
 	};
+	float rpmMax = 0.0;
 
-	mbl_adapter();
-	~mbl_adapter();
 	void on_connect(int rc);
 	void on_disconnect(int rc);
 	void on_message(const struct mosquitto_message *message);
+
+public:
+	mbl_adapter(const char* id);
+	~mbl_adapter();
 };
