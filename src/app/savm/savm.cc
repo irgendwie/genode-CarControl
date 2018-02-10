@@ -88,6 +88,13 @@ savm::savm(const char *id) : mosquittopp(id)
 		}
 	}
 
+	/* disable Nagle's algorithm */
+	int flag = 1;
+   	int result = lwip_setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof(int));
+	if (result == -1) {
+		Genode::error("setsockopt failed: ", (const char *)strerror(errno));
+	}
+
 	/******************
 	 ** Message flow **
 	 ******************/
@@ -192,7 +199,7 @@ savm::savm(const char *id) : mosquittopp(id)
 		}
 
 		num++;
-		Genode::log("successful loop number: ", num);
+		//Genode::log("successful loop number: ", num);
 	}
 }
 
@@ -208,22 +215,22 @@ savm::~savm() {
 
 void savm::on_message(const struct mosquitto_message *message)
 {
-	char *type = strrchr(message->topic, '/');
+	char *type = strrchr(message->topic, '/') + 1;
 	char *value = (char *)message->payload;
 
-	if (strcmp(type, "steer")) {
+	if (!strcmp(type, "steer")) {
 		cdi.set_steer(atof(value));
-	} else if (strcmp(type, "accel")) {
+	} else if (!strcmp(type, "accel")) {
 		cdi.set_accel(atof(value));
-	} else if (strcmp(type, "brakeFL")) {
+	} else if (!strcmp(type, "brakeFL")) {
 		cdi.set_brakefl(atof(value));
-	} else if (strcmp(type, "brakeFR")) {
+	} else if (!strcmp(type, "brakeFR")) {
 		cdi.set_brakefr(atof(value));
-	} else if (strcmp(type, "brakeRL")) {
+	} else if (!strcmp(type, "brakeRL")) {
 		cdi.set_brakerl(atof(value));
-	} else if (strcmp(type, "brakeRR")) {
+	} else if (!strcmp(type, "brakeRR")) {
 		cdi.set_brakerr(atof(value));
-	} else if (strcmp(type, "gear")) {
+	} else if (!strcmp(type, "gear")) {
 		cdi.set_gear(atoi(value));
 	} else {
 		Genode::log("unknown topic: ", (const char *)message->topic);

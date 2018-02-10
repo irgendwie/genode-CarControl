@@ -1,25 +1,3 @@
-#
-# \brief  Test for using the lwIP TCP/IP stack
-# \author Norman Feske
-# \date   2011-05-22
-#
-# This test case executes a small HTTP server on Genode running on qemu. When
-# the HTTP server is up, a HTTP request to the server is performed using
-# 'lynx'. The response is validated against a known pattern.
-#
-# The test uses qemu's "-net user" option, redirecting Genode's port 80 to the
-# host's port 5555. Consequently, it cannot be executed on non-qemu test
-# environments (i.e., the test won't work with the Linux version of Genode).
-#
-# Please make sure to include a nic driver in your build configuration. E.g.,
-# on the x86 platform, you may enable the 'dde_ipxe' repository.
-#
-
-#
-# TODO: Add support for Linux via user-level networking (using the
-#       tun/tap proxy driver at os/src/drivers/nic/linux)
-#
-
 set use_usb_driver [expr [have_spec omap4] || [have_spec arndale] || [have_spec rpi]]
 set use_nic_driver [expr !$use_usb_driver && ![have_spec imx53] && ![have_spec hw_odroid_xu] && ![have_spec linux] && ![have_spec hw_wand_quad]]
 
@@ -134,7 +112,7 @@ build_boot_image $boot_modules
 #
 
 # qemu config
-append qemu_args " -m 128 -nographic "
+append qemu_args " -m 1024 -nographic -smp 4 "
 
 append qemu_args " -net nic,macaddr=02:00:00:00:01:01 "
 

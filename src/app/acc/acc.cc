@@ -10,8 +10,9 @@
 
 acc::acc(const char* id) : mosquittopp(id)
 {
+	/* initialization */
 	sem_init(&allValSem, 0, 0);
-	mosqpp::lib_init();  /* initialize mosquitto library */
+	mosqpp::lib_init();
 
 	/* configure mosquitto library */
 	Genode::Xml_node mosquitto = Genode::config()->xml_node().sub_node("mosquitto");
@@ -37,23 +38,48 @@ acc::acc(const char* id) : mosquittopp(id)
 	} while(ret != MOSQ_ERR_SUCCESS);
 
 	/* subscribe to topic */
-	subscribe(NULL, topic);
+	do {
+		ret = this->subscribe(NULL, topic);
+		switch(ret) {
+		case MOSQ_ERR_INVAL:
+			Genode::error("invalid parameter for mosquitto subscribe");
+			return;
+		case MOSQ_ERR_NOMEM:
+			Genode::error("out of memory condition occurred");
+			return;
+		case MOSQ_ERR_NO_CONN:
+			Genode::error("not connected to a broker");
+			return;
+		}
+	} while(ret != MOSQ_ERR_SUCCESS);
 
 	/* start non-blocking loop */
-	loop_start();
+	ret = this->loop_start();
+	if (ret != MOSQ_ERR_SUCCESS) {
+		switch(ret) {
+		case MOSQ_ERR_INVAL:
+			Genode::error("invalid parameter for mosquitto loop_start");
+			return;
+		case MOSQ_ERR_NOT_SUPPORTED:
+			Genode::error("mosquitto no thrad support");
+			return;
+		}
+	}
 
-	/* main loop */
-	int num = 0;
+	/***************
+	 ** main loop **
+	 ***************/
+	CommandDataOut cdo;  /* command data for the next simulation step */
+	char val[512];       /* buffer to convert values to string for mosq */
+	
 	while(true) {
-
 		/* wait till we get all data */
 		sem_wait(&allValSem);
 
 		/* calculate commanddataout */
-		struct CommandDataOut cdo = followDriving(this->sdi);
+		cdo = followDriving(this->sdi);
 
 		/* publish */
-		char val[512];
 		snprintf(val, sizeof(val), "%f", cdo.steer);
 		myPublish("steer", val);
 
@@ -74,15 +100,19 @@ acc::acc(const char* id) : mosquittopp(id)
 
 		snprintf(val, sizeof(val), "%d", cdo.gear);
 		myPublish("gear", val);
-
-		num++;
-		Genode::log("successful loop number: ", num);
 	}
 }
 
+/* TODO */
 acc::~acc() {
 }
 
+/**
+ * custom publish function
+ *
+ * \param type  value name
+ * \param value value as string
+ */
 void acc::myPublish(char *type, char *value) {
 	char topic[1024];
 	strcpy(topic, "ecu/acc/");
@@ -92,39 +122,49 @@ void acc::myPublish(char *type, char *value) {
 
 void acc::on_message(const struct mosquitto_message *message)
 {
-	char *type = strrchr(message->topic, '/');
+	/* split type from topic */
+	char *type = strrchr(message->topic, '/') + 1;
+	/* get pointer to payload for convenience */
 	char *value = (char *)message->payload;
-	vec2 vec;
 
-	if (strcmp(type, "isPositionTracked")) {
+	/* split x,y into two separate values */
+	float x, y;
+	if (strstr(value, ",")) {
+		x = atof(strtok(value, ","));
+		y = atof(strtok(NULL, ","));
+	}
+
+	/* fill sensorDataIn struct */
+	if (!strcmp(type, "isPositionTracked")) {
 		sdi.isPositionTracked = atoi(value);
-	} else if (strcmp(type, "isSpeedTracked")) {
+	} else if (!strcmp(type, "isSpeedTracked")) {
 		sdi.isSpeedTracked = atoi(value);
-	} else if (strcmp(type, "leadPos")) {
-		sdi.leadPos = vec2(atof(strtok(value, ",")), atof(strtok(NULL, ",")));
-	} else if (strcmp(type, "ownPos")) {
-		sdi.ownPos = vec2(atof(strtok(value, ",")), atof(strtok(NULL, ",")));
-	} else if (strcmp(type, "cornerFrontRight")) {
-		sdi.cornerFrontRight = vec2(atof(strtok(value, ",")), atof(strtok(NULL, ",")));
-	} else if (strcmp(type, "cornerFrontLeft")) {
-		sdi.cornerFrontLeft = vec2(atof(strtok(value, ",")), atof(strtok(NULL, ",")));
-	} else if (strcmp(type, "cornerRearLeft")) {
-		sdi.cornerRearLeft = vec2(atof(strtok(value, ",")), atof(strtok(NULL, ",")));
-	} else if (strcmp(type, "cornerRearRight")) {
-		sdi.cornerRearRight = vec2(atof(strtok(value, ",")), atof(strtok(NULL, ",")));
-	} else if (strcmp(type, "leadSpeed")) {
+	} else if (!strcmp(type, "leadPos")) {
+		sdi.leadPos = vec2(x, y);
+	} else if (!strcmp(type, "ownPos")) {
+		sdi.ownPos = vec2(x, y);
+	} else if (!strcmp(type, "cornerFrontRight")) {
+		sdi.cornerFrontRight = vec2(x, y);
+	} else if (!strcmp(type, "cornerFrontLeft")) {
+		sdi.cornerFrontLeft = vec2(x, y);
+	} else if (!strcmp(type, "cornerRearLeft")) {
+		sdi.cornerRearLeft = vec2(x, y);
+	} else if (!strcmp(type, "cornerRearRight")) {
+		sdi.cornerRearRight = vec2(x, y);
+	} else if (!strcmp(type, "leadSpeed")) {
 		sdi.leadSpeed = atof(value);
-	} else if (strcmp(type, "ownSpeed")) {
+	} else if (!strcmp(type, "ownSpeed")) {
 		sdi.ownSpeed = atof(value);
-	} else if (strcmp(type, "curGear")) {
+	} else if (!strcmp(type, "curGear")) {
 		sdi.curGear = atoi(value);
-	} else if (strcmp(type, "steerLock")) {
+	} else if (!strcmp(type, "steerLock")) {
 		sdi.steerLock = atof(value);
- 	} else {
-		Genode::log("unknown topic: ", (const char *)message->topic);
+	} else {
+		//Genode::log("unknown topic: ", (const char *)message->topic);
 		return;
 	}
 
+	/* check if we got all values */
 	allValues = (allValues + 1) % 12;
 	if (!allValues) {
 		sem_post(&allValSem);
@@ -141,25 +181,37 @@ void acc::on_disconnect(int rc)
 	Genode::log("disconnect from mosquitto server");
 }
 
+/**
+ * calculates the gear
+ * based on empiric values? of the speed
+ *
+ * took it 1:1 from https://github.com/argos-research/genode-Simcom
+ */
 int acc::getSpeedDepGear(float speed, int currentGear)
 {
-	// 0   60  100 150 200 250 km/h
+	// 0	 60  100 150 200 250 km/h
 	float gearUP[6] = {-1, 17, 27, 41, 55, 70}; //Game uses values in m/s: xyz m/s = (3.6 * xyz) km/h
-	float gearDN[6] = {0,  0,  15, 23, 35, 48};
+	float gearDN[6] = {0,	 0,  15, 23, 35, 48};
 
 	int gear = currentGear;
 
 	if (speed > gearUP[gear])
-		{
-			gear = std::min(5, currentGear + 1);
-		}
+	{
+		gear = std::min(5, currentGear + 1);
+	}
 	if (speed < gearDN[gear])
-		{
-			gear = std::max(1, currentGear - 1);
-		}
+	{
+		gear = std::max(1, currentGear - 1);
+	}
 	return gear;
 }
 
+/**
+ * calculates command data for the next simulation step
+ * based on the sensor data from the previous step
+ *
+ * took it 1:1 from https://github.com/argos-research/genode-Simcom
+ */
 CommandDataOut acc::followDriving(SensorDataIn sd)
 {
 	// Get position of nearest opponent in front
@@ -174,9 +226,9 @@ CommandDataOut acc::followDriving(SensorDataIn sd)
 	CommandDataOut cd = {0};
 
 	if(!sd.isPositionTracked)
-		{
-			return cd;
-		}
+	{
+		return cd;
+	}
 	vec2 curLeadPos = sd.leadPos;
 	vec2 ownPos = sd.ownPos;
 
@@ -204,9 +256,9 @@ CommandDataOut acc::followDriving(SensorDataIn sd)
 
 	// Only possible to calculate accel and brake if speed of leading car known
 	if(!sd.isSpeedTracked) // If position of leading car known in last frame
-		{
-			return cd;
-		}
+	{
+		return cd;
+	}
 
 	float fspeed = sd.ownSpeed; // speed of following car
 
@@ -227,13 +279,13 @@ CommandDataOut acc::followDriving(SensorDataIn sd)
 	//float b = std::max<float>(0, std::min<float>(g_maxBrake, std::sqrt(g_maxBrake * (adist - dist) / adist)));
 	float dv = (lspeed - fspeed);
 	if (dv > 0.0 && dist > 5.0)
-		{
-			cd.accel = 0.5 * dv;
-		}
+	{
+		cd.accel = 0.5 * dv;
+	}
 	else if (dist < 30.0)
-		{
-			cd.brakeFL = cd.brakeFR = cd.brakeRL = cd.brakeRR = -0.5 * dv;
-		}
+	{
+		cd.brakeFL = cd.brakeFR = cd.brakeRL = cd.brakeRR = -0.5 * dv;
+	}
 	//char format[256];
 	//sprintf(format, "Speeds: %4.4f %4.4f %4.4f\n", lspeed, fspeed, dist);
 	//PDBG("%s", format);
