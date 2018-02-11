@@ -1,7 +1,6 @@
 #include <base/component.h>
 #include <util/xml_node.h>
 #include <os/config.h>
-#include <savm/savm.h>
 #include <nic/packet_allocator.h>
 #include <lwip/genode.h>
 extern "C" {
@@ -16,6 +15,8 @@ void Component::construct(Genode::Env &)
 	enum { BUF_SIZE = Nic::Packet_allocator::DEFAULT_PACKET_SIZE * 128 };
 
 	Genode::Xml_node network = Genode::config()->xml_node().sub_node("network");
+
+	//lwip_tcpip_init();
 
 	if (network.attribute_value<bool>("dhcp", true)) {
 		if (lwip_nic_init(0,
@@ -39,6 +40,4 @@ void Component::construct(Genode::Env &)
 			return;
 		}
 	}
-
-	savm savm("savm");
 }

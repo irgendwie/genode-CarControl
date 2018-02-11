@@ -25,7 +25,7 @@ class savm : public mosqpp::mosquittopp
 	void on_message(const struct mosquitto_message *message);
 
 	void readAllBytes(void *buf, int socket, unsigned int size);
-	void myPublish(char *type, char *value);
+	void myPublish(const char *type, const char *value);
 
 	public:
 	savm(const char* id);

@@ -11,7 +11,8 @@ if {[expr !$use_usb_driver && !$use_nic_driver]} {
 set build_components {
 	core init
 	drivers/timer drivers/nic
-	app/savm
+	server/nic_bridge
+	app/mbl_adapter app/mbl_client app/savm app/acc
 }
 
 lappend_if $use_usb_driver              build_components drivers/usb
@@ -48,12 +49,61 @@ set config {
 		<resource name="RAM" quantum="1M"/>
 		<provides> <service name="Timer"/> </provides>
 	</start>
+	<start name="nic_bridge">
+		<resource name="RAM" quantum="24M"/>
+		<provides><service name="Nic"/></provides>
+		<route>
+			<service name="Nic"> <child name="nic_drv"/> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+		<config/>
+	</start>
+	<start name="mbl_adapter">
+		<resource name="RAM" quantum="5M"/>
+		<route>
+			<service name="Nic"> <child name="nic_bridge"/> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+		<config>
+			<mosquitto ip-address="192.168.137.1" />
+			<network dhcp="yes" />
+		</config>
+	</start>
+	<start name="mbl_client">
+		<resource name="RAM" quantum="5M"/>
+		<route>
+			<service name="Nic"> <child name="nic_bridge"/> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+		<config>
+			<mosquitto ip-address="192.168.137.1" />
+			<network dhcp="yes" />
+		</config>
+	</start>
+	<start name="acc">
+		<resource name="RAM" quantum="5M"/>
+		<route>
+			<service name="Nic"> <child name="nic_bridge"/> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+		<config>
+			<mosquitto ip-address="192.168.137.1" />
+			<network dhcp="yes" />
+		</config>
+	</start>
 	<start name="savm">
 		<resource name="RAM" quantum="5M"/>
+		<route>
+			<service name="Nic"> <child name="nic_bridge"/> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
 		<config>
-			<mosquitto ip-address="10.200.40.10" />
+			<mosquitto ip-address="192.168.137.1" />
+			<speed-dreams ip-address="192.168.137.1" port="9002" />
+			<network dhcp="yes" />
 		</config>
-	</start>}
+	</start>
+}
 
 append_if [have_spec gpio] config {
 	<start name="gpio_drv">
@@ -94,8 +144,9 @@ install_config $config
 # generic modules
 set boot_modules {
 	core init timer
+	nic_bridge
 	ld.lib.so libc.lib.so lwip.lib.so libm.lib.so libmosquitto.lib.so pthread.lib.so stdcxx.lib.so libssl.lib.so libcrypto.lib.so libprotobuf.lib.so zlib.lib.so
-	savm
+	mbl_adapter mbl_client acc savm
 }
 
 # platform-specific modules
@@ -114,11 +165,11 @@ build_boot_image $boot_modules
 # qemu config
 append qemu_args " -m 1024 -nographic -smp 4 "
 
-append qemu_args " -net nic,macaddr=02:00:00:00:01:01 "
+append qemu_args " -net nic,macaddr=02:00:00:00:01:03 "
 
 append_if [have_spec x86]     qemu_args " -net nic,model=e1000 "
 append_if [have_spec lan9118] qemu_args " -net nic,model=lan9118 "
 
-append qemu_args " -net vde,sock=/tmp/switch1 "
+append qemu_args " -net vde,sock=/tmp/switch "
 
 run_genode_until forever

@@ -23,13 +23,14 @@ mbl_adapter::mbl_adapter(const char* id) : mosquittopp(id)
 	/* connect to mosquitto server */
 	int ret;
 	do {
-		ret = connect(host, port, keepalive);
+		ret = this->connect(host, port, keepalive);
 		switch(ret) {
 		case MOSQ_ERR_INVAL:
 			Genode::error("invalid parameter for mosquitto connect");
 			return;
 		case MOSQ_ERR_ERRNO:
-			Genode::log((void *)strerror(errno));
+			break;
+			Genode::log("mosquitto ", (const char *)strerror(errno));
 		}
 	} while(ret != MOSQ_ERR_SUCCESS);
 
@@ -53,7 +54,8 @@ mbl_adapter::mbl_adapter(const char* id) : mosquittopp(id)
 	loop_forever();
 }
 
-mbl_adapter::~mbl_adapter() {
+mbl_adapter::~mbl_adapter()
+{
 }
 
 void mbl_adapter::on_message(const struct mosquitto_message *message)
@@ -81,7 +83,7 @@ void mbl_adapter::on_message(const struct mosquitto_message *message)
 	} else if (!strcmp(type, "enginerpmMax")) {
 		this->rpmMax = atof(value);
 	} else {
-		//Genode::log("unknown topic: ", (const char *)message->topic);
+		Genode::log("unknown topic: ", (const char *)message->topic);
 	}
 }
 

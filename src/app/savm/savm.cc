@@ -4,7 +4,6 @@
 #include <os/config.h>
 #include <string.h>
 #include <errno.h>
-#include <timer_session/connection.h>
 
 /* fix redefinition of struct timeval */
 #define timeval _timeval
@@ -15,11 +14,11 @@ extern "C" {
 #include <lwip/genode.h>
 
 void savm::readAllBytes(void *buf, int socket, unsigned int size) {
-	int offset = 0;
+	unsigned int offset = 0;
 	int ret = 0;
 
 	do {
-		ret = lwip_read(socket, buf + offset, size - offset);
+		ret = lwip_read(socket, (char *)buf + offset, size - offset);
 		if (ret == -1) {
 			Genode::error("lwip_read failed: ", (const char *)strerror(errno));
 		} else {
@@ -46,18 +45,32 @@ savm::savm(const char *id) : mosquittopp(id)
 	/* connect to mosquitto server */
 	int ret;
 	do {
-		ret = connect(host, port, keepalive);
+		ret = this->connect(host, port, keepalive);
 		switch(ret) {
 		case MOSQ_ERR_INVAL:
 			Genode::error("invalid parameter for mosquitto connect");
 			return;
 		case MOSQ_ERR_ERRNO:
+			break;
 			Genode::log("mosquitto ", (const char *)strerror(errno));
 		}
 	} while(ret != MOSQ_ERR_SUCCESS);
 
 	/* subscribe to topic */
-	subscribe(NULL, topic);
+	do {
+		ret = this->subscribe(NULL, topic);
+		switch(ret) {
+		case MOSQ_ERR_INVAL:
+			Genode::error("invalid parameter for mosquitto subscribe");
+			return;
+		case MOSQ_ERR_NOMEM:
+			Genode::error("out of memory condition occurred");
+			return;
+		case MOSQ_ERR_NO_CONN:
+			Genode::error("not connected to a broker");
+			return;
+		}
+	} while(ret != MOSQ_ERR_SUCCESS);
 
 	/* start non-blocking mosquitto loop */
 	loop_start();
@@ -65,14 +78,23 @@ savm::savm(const char *id) : mosquittopp(id)
 	/***********************
 	 ** Connection to SD2 **
 	 ***********************/
-	Timer::Connection timer;
-
 	int sock;
+
+	char ip_addr[16] = { 0 };
+	unsigned int port = 0;
+
+	Genode::Xml_node speeddreams = Genode::config()->xml_node().sub_node("speed-dreams");
+	try {
+		speeddreams.attribute("ip-address").value(ip_addr, sizeof(ip_addr));
+		speeddreams.attribute("port").value<unsigned int>(&port);
+	} catch(Genode::Xml_node::Nonexistent_attribute) {
+		Genode::error("please check speed-dreams configuration");
+	}
 	
 	struct sockaddr_in srv_addr;
 	bzero(&srv_addr, sizeof(srv_addr));
 	srv_addr.sin_family = AF_INET;
-	srv_addr.sin_addr.s_addr = inet_addr("10.200.40.10");
+	srv_addr.sin_addr.s_addr = inet_addr("192.168.137.1");
 	srv_addr.sin_port = htons(9002);
 
 	if ((sock = lwip_socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -81,7 +103,6 @@ savm::savm(const char *id) : mosquittopp(id)
 
 	while((ret = lwip_connect(sock, (struct sockaddr *)&srv_addr, sizeof(srv_addr)) == -1)) {
 		Genode::error("connect failed: ", (const char *)strerror(errno));
-		timer.msleep(1000);
 		lwip_close(sock);
 		if ((sock = lwip_socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 			Genode::error("socket failed: ", (const char *)strerror(errno));
@@ -100,7 +121,7 @@ savm::savm(const char *id) : mosquittopp(id)
 	 ******************/
 	protobuf::SensorDataOut sdo;
 	protobuf::SensorDataOut_vec2 vec2;
-	char val[512];
+	char val[512] = { 0 };
 	int num = 0;
 	while(true) {
 		uint32_t msg_len;
@@ -191,7 +212,7 @@ savm::savm(const char *id) : mosquittopp(id)
 		ret = lwip_write(sock, cdi_str.c_str(), msg_len);
 		if (ret == -1) {
 			Genode::error("write cdi failed! ", (const char *)strerror(errno));
-		} else if (ret != msg_len) {
+		} else if ((unsigned int)ret < msg_len) {
 			Genode::error("write cdi failed to send complete message! ",
 						  ret,
 						  " vs. ",
@@ -203,7 +224,7 @@ savm::savm(const char *id) : mosquittopp(id)
 	}
 }
 
-void savm::myPublish(char *type, char *value) {
+void savm::myPublish(const char *type, const char *value) {
 	char topic[1024];
 	strcpy(topic, "savm/car/0/");
 	strncat(topic, type, sizeof(topic));

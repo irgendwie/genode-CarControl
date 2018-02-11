@@ -33,6 +33,7 @@ acc::acc(const char* id) : mosquittopp(id)
 			Genode::error("invalid parameter for mosquitto connect");
 			return;
 		case MOSQ_ERR_ERRNO:
+			break;
 			Genode::log("mosquitto ", (const char *)strerror(errno));
 		}
 	} while(ret != MOSQ_ERR_SUCCESS);
