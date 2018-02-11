@@ -20,6 +20,10 @@ private:
 	const static int SERVO_UPPER_BOUND = 7500;
 	const static int SERVO_LOWER_BOUND = 4500;
 
+	int rbrake;
+	float brakeRL;
+	float brakeRR;
+
 public:
 	servo_adapter(const char* id);
 	~servo_adapter();

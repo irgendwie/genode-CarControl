@@ -8,6 +8,8 @@
 
 servo_adapter::servo_adapter(const char* id) : mosquittopp(id)
 {
+	this->rbrake = 0;
+	
 	mosqpp::lib_init();  /* initialize mosquitto library */
 
 	/* configure mosquitto library */
@@ -104,11 +106,18 @@ void servo_adapter::on_message(const struct mosquitto_message *message)
 		snprintf(buffer, sizeof(buffer), "%d", transform_brake(brakeFR));
 		publish(NULL, "rcar/control/servo/brake/fr", strlen(buffer), buffer);
 	} else if (!strcmp(type, "brakeRL")) {
-		/* TODO */
+		brakeRL = atof(value);
+		rbrake++;
 	} else if (!strcmp(type, "brakeRR")) {
-		/* TODO */
+		brakeRR = atof(value);
+		rbrake++;
 	} else {
 		Genode::log("unknown topic: ", (const char *)message->topic);
+	}
+
+	if (!(rbrake %= 2)) {
+		snprintf(buffer, sizeof(buffer), "%d", transform_brake((brakeRL + brakeRR) / 2));
+		publish(NULL, "rcar/control/servo/brake/r", strlen(buffer), buffer);
 	}
 }
 
