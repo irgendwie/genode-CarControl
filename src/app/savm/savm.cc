@@ -187,6 +187,18 @@ savm::savm(const char *id) : mosquittopp(id)
 		snprintf(val, sizeof(val), "%f", sdo.steer());
 		myPublish("steer", val);
 
+		snprintf(val, sizeof(val), "%f", sdo.brakefl());
+		myPublish("brakeFL", val);
+
+		snprintf(val, sizeof(val), "%f", sdo.brakefr());
+		myPublish("brakeFR", val);
+
+		snprintf(val, sizeof(val), "%f", sdo.brakerl());
+		myPublish("brakeRL", val);
+
+		snprintf(val, sizeof(val), "%f", sdo.brakerr());
+		myPublish("brakeRR", val);
+
 		/*******************
 		 ** CommandDataIn **
 		 *******************/

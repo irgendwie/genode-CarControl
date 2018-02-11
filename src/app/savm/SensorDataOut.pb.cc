@@ -105,6 +105,10 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::protobuf::SensorDataOut, enginerpm_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::protobuf::SensorDataOut, enginerpmmax_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::protobuf::SensorDataOut, steer_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::protobuf::SensorDataOut, brakefl_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::protobuf::SensorDataOut, brakefr_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::protobuf::SensorDataOut, brakerl_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::protobuf::SensorDataOut, brakerr_),
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::protobuf::SensorDataOut_vec2)},
@@ -138,7 +142,7 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\023SensorDataOut.proto\022\010protobuf\"\232\004\n\rSens"
+      "\n\023SensorDataOut.proto\022\010protobuf\"\336\004\n\rSens"
       "orDataOut\022\031\n\021isPositionTracked\030\001 \001(\010\022\026\n\016"
       "isSpeedTracked\030\002 \001(\010\022-\n\007leadPos\030\003 \001(\0132\034."
       "protobuf.SensorDataOut.vec2\022,\n\006ownPos\030\004 "
@@ -151,11 +155,13 @@ void AddDescriptorsImpl() {
       "rDataOut.vec2\022\021\n\tleadSpeed\030\t \001(\002\022\020\n\010ownS"
       "peed\030\n \001(\002\022\017\n\007curGear\030\013 \001(\005\022\021\n\tsteerLock"
       "\030\014 \001(\002\022\021\n\tenginerpm\030\r \001(\002\022\024\n\014enginerpmMa"
-      "x\030\016 \001(\002\022\r\n\005steer\030\017 \001(\002\032\034\n\004vec2\022\t\n\001x\030\001 \001("
-      "\002\022\t\n\001y\030\002 \001(\002b\006proto3"
+      "x\030\016 \001(\002\022\r\n\005steer\030\017 \001(\002\022\017\n\007brakeFL\030\020 \001(\002\022"
+      "\017\n\007brakeFR\030\021 \001(\002\022\017\n\007brakeRL\030\022 \001(\002\022\017\n\007bra"
+      "keRR\030\023 \001(\002\032\034\n\004vec2\022\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002"
+      "b\006proto3"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 580);
+      descriptor, 648);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "SensorDataOut.proto", &protobuf_RegisterTypes);
 }
@@ -481,6 +487,10 @@ const int SensorDataOut::kSteerLockFieldNumber;
 const int SensorDataOut::kEnginerpmFieldNumber;
 const int SensorDataOut::kEnginerpmMaxFieldNumber;
 const int SensorDataOut::kSteerFieldNumber;
+const int SensorDataOut::kBrakeFLFieldNumber;
+const int SensorDataOut::kBrakeFRFieldNumber;
+const int SensorDataOut::kBrakeRLFieldNumber;
+const int SensorDataOut::kBrakeRRFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 SensorDataOut::SensorDataOut()
@@ -527,15 +537,15 @@ SensorDataOut::SensorDataOut(const SensorDataOut& from)
     cornerrearleft_ = NULL;
   }
   ::memcpy(&ispositiontracked_, &from.ispositiontracked_,
-    static_cast<size_t>(reinterpret_cast<char*>(&steer_) -
-    reinterpret_cast<char*>(&ispositiontracked_)) + sizeof(steer_));
+    static_cast<size_t>(reinterpret_cast<char*>(&brakerr_) -
+    reinterpret_cast<char*>(&ispositiontracked_)) + sizeof(brakerr_));
   // @@protoc_insertion_point(copy_constructor:protobuf.SensorDataOut)
 }
 
 void SensorDataOut::SharedCtor() {
   ::memset(&leadpos_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&steer_) -
-      reinterpret_cast<char*>(&leadpos_)) + sizeof(steer_));
+      reinterpret_cast<char*>(&brakerr_) -
+      reinterpret_cast<char*>(&leadpos_)) + sizeof(brakerr_));
   _cached_size_ = 0;
 }
 
@@ -607,8 +617,8 @@ void SensorDataOut::Clear() {
   }
   cornerrearleft_ = NULL;
   ::memset(&ispositiontracked_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&steer_) -
-      reinterpret_cast<char*>(&ispositiontracked_)) + sizeof(steer_));
+      reinterpret_cast<char*>(&brakerr_) -
+      reinterpret_cast<char*>(&ispositiontracked_)) + sizeof(brakerr_));
   _internal_metadata_.Clear();
 }
 
@@ -618,7 +628,7 @@ bool SensorDataOut::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   // @@protoc_insertion_point(parse_start:protobuf.SensorDataOut)
   for (;;) {
-    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoffNoLastTag(127u);
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoffNoLastTag(16383u);
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
@@ -820,6 +830,62 @@ bool SensorDataOut::MergePartialFromCodedStream(
         break;
       }
 
+      // float brakeFL = 16;
+      case 16: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(133u /* 133 & 0xFF */)) {
+
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 input, &brakefl_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // float brakeFR = 17;
+      case 17: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(141u /* 141 & 0xFF */)) {
+
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 input, &brakefr_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // float brakeRL = 18;
+      case 18: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(149u /* 149 & 0xFF */)) {
+
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 input, &brakerl_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // float brakeRR = 19;
+      case 19: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(157u /* 157 & 0xFF */)) {
+
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
+                 input, &brakerr_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
       default: {
       handle_unusual:
         if (tag == 0) {
@@ -927,6 +993,26 @@ void SensorDataOut::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteFloat(15, this->steer(), output);
   }
 
+  // float brakeFL = 16;
+  if (this->brakefl() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(16, this->brakefl(), output);
+  }
+
+  // float brakeFR = 17;
+  if (this->brakefr() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(17, this->brakefr(), output);
+  }
+
+  // float brakeRL = 18;
+  if (this->brakerl() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(18, this->brakerl(), output);
+  }
+
+  // float brakeRR = 19;
+  if (this->brakerr() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteFloat(19, this->brakerr(), output);
+  }
+
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         (::google::protobuf::internal::GetProto3PreserveUnknownsDefault()   ? _internal_metadata_.unknown_fields()   : _internal_metadata_.default_instance()), output);
@@ -1026,6 +1112,26 @@ void SensorDataOut::SerializeWithCachedSizes(
   // float steer = 15;
   if (this->steer() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(15, this->steer(), target);
+  }
+
+  // float brakeFL = 16;
+  if (this->brakefl() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(16, this->brakefl(), target);
+  }
+
+  // float brakeFR = 17;
+  if (this->brakefr() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(17, this->brakefr(), target);
+  }
+
+  // float brakeRL = 18;
+  if (this->brakerl() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(18, this->brakerl(), target);
+  }
+
+  // float brakeRR = 19;
+  if (this->brakerr() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(19, this->brakerr(), target);
   }
 
   if ((_internal_metadata_.have_unknown_fields() &&  ::google::protobuf::internal::GetProto3PreserveUnknownsDefault())) {
@@ -1134,6 +1240,26 @@ size_t SensorDataOut::ByteSizeLong() const {
     total_size += 1 + 4;
   }
 
+  // float brakeFL = 16;
+  if (this->brakefl() != 0) {
+    total_size += 2 + 4;
+  }
+
+  // float brakeFR = 17;
+  if (this->brakefr() != 0) {
+    total_size += 2 + 4;
+  }
+
+  // float brakeRL = 18;
+  if (this->brakerl() != 0) {
+    total_size += 2 + 4;
+  }
+
+  // float brakeRR = 19;
+  if (this->brakerr() != 0) {
+    total_size += 2 + 4;
+  }
+
   int cached_size = ::google::protobuf::internal::ToCachedSize(total_size);
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = cached_size;
@@ -1208,6 +1334,18 @@ void SensorDataOut::MergeFrom(const SensorDataOut& from) {
   if (from.steer() != 0) {
     set_steer(from.steer());
   }
+  if (from.brakefl() != 0) {
+    set_brakefl(from.brakefl());
+  }
+  if (from.brakefr() != 0) {
+    set_brakefr(from.brakefr());
+  }
+  if (from.brakerl() != 0) {
+    set_brakerl(from.brakerl());
+  }
+  if (from.brakerr() != 0) {
+    set_brakerr(from.brakerr());
+  }
 }
 
 void SensorDataOut::CopyFrom(const ::google::protobuf::Message& from) {
@@ -1249,6 +1387,10 @@ void SensorDataOut::InternalSwap(SensorDataOut* other) {
   swap(enginerpm_, other->enginerpm_);
   swap(enginerpmmax_, other->enginerpmmax_);
   swap(steer_, other->steer_);
+  swap(brakefl_, other->brakefl_);
+  swap(brakefr_, other->brakefr_);
+  swap(brakerl_, other->brakerl_);
+  swap(brakerr_, other->brakerr_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   swap(_cached_size_, other->_cached_size_);
 }

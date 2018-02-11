@@ -11,8 +11,10 @@ if {[expr !$use_usb_driver && !$use_nic_driver]} {
 set build_components {
 	core init
 	drivers/timer drivers/nic
-	server/nic_bridge
-	app/mbl_adapter app/mbl_client app/savm app/acc
+	server/nic_bridge server/servo_controller server/usb_terminal
+	app/savm app/acc
+	app/mbl_adapter app/mbl_client
+	app/servo_adapter app/servo_client
 }
 
 lappend_if $use_usb_driver              build_components drivers/usb
@@ -49,6 +51,10 @@ set config {
 		<resource name="RAM" quantum="1M"/>
 		<provides> <service name="Timer"/> </provides>
 	</start>
+	<start name="usb_terminal">
+               <resource name="RAM" quantum="2M"/>
+	       <provides><service name="Terminal"/></provides>
+	</start>
 	<start name="nic_bridge">
 		<resource name="RAM" quantum="24M"/>
 		<provides><service name="Nic"/></provides>
@@ -70,6 +76,28 @@ set config {
 		</config>
 	</start>
 	<start name="mbl_client">
+		<resource name="RAM" quantum="5M"/>
+		<route>
+			<service name="Nic"> <child name="nic_bridge"/> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+		<config>
+			<mosquitto ip-address="192.168.137.1" />
+			<network dhcp="yes" />
+		</config>
+	</start>
+	<start name="servo_adapter">
+		<resource name="RAM" quantum="5M"/>
+		<route>
+			<service name="Nic"> <child name="nic_bridge"/> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+		<config>
+			<mosquitto ip-address="192.168.137.1" />
+			<network dhcp="yes" />
+		</config>
+	</start>
+	<start name="servo_client">
 		<resource name="RAM" quantum="5M"/>
 		<route>
 			<service name="Nic"> <child name="nic_bridge"/> </service>
@@ -120,6 +148,9 @@ append_if $use_usb_driver config {
 		</provides>
 		<config ehci="yes">
 			<nic mac="02:00:00:00:01:01" />
+			<raw>
+				<policy label="usb_terminal -> usb_serial" vendor_id="0x67b" product_id="0x2303"/>
+			</raw>
 		</config>
 	</start>}
 
@@ -144,9 +175,10 @@ install_config $config
 # generic modules
 set boot_modules {
 	core init timer
-	nic_bridge
+	nic_bridge servo_controller usb_terminal
 	ld.lib.so libc.lib.so lwip.lib.so libm.lib.so libmosquitto.lib.so pthread.lib.so stdcxx.lib.so libssl.lib.so libcrypto.lib.so libprotobuf.lib.so zlib.lib.so
-	mbl_adapter mbl_client acc savm
+	mbl_adapter mbl_client servo_adapter servo_client
+	acc savm
 }
 
 # platform-specific modules
