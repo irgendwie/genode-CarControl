@@ -35,5 +35,9 @@
 6. Speed-dreams should continue loading and start the race
 7. Watch the magic happen
 
-## Flow
+## Flow Diagram
+### General
 ![flow_diagram.png](https://github.com/irgendwie/genode-CarControl/raw/master/flow_diagram.png)
+
+### Additional information
+- SpeedDreams uses the `9002` port by default and acts as a server
