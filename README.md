@@ -27,7 +27,7 @@
 ```
 
 ## Instructions
-1. Use the `ACC` branch of speed-dreams
+1. Use the `ACC` branch of speed-dreams [(ref.)](https://github.com/argos-research/speed-dreams/tree/ACC)
 2. Configure a race to consist of two bots, with the ACC driver in the second position
 3. Start a mosquitto server
 4. Bring up all applications (`acc`, `mbl_adapter`, `mbl_client`, `servo_adapter`, `servo_client`) **except** for the `savm`
