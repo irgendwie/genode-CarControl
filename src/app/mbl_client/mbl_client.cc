@@ -4,9 +4,13 @@
 #include <os/config.h>
 #include <string.h>
 #include <errno.h>
+#include <ecu_api/Defines.h>
 
 mbl_client::mbl_client(const char* id) : mosquittopp(id)
 {
+        /* initialize roboteq core api */
+        CoreAPI * _core = new CoreAPI(CONNECTION_COM);
+
 	mosqpp::lib_init();  /* initialize mosquitto library */
 
 	/* configure mosquitto library */
@@ -67,6 +71,7 @@ void mbl_client::on_message(const struct mosquitto_message *message)
 	if (!strcmp(type, "powerpct")) {
 		unsigned int powerpct = atoi(value);
 		/* TODO set motor power percentage to powerpct */
+                _core->SetMotorSpeedAbs(powerpct);
 	} else {
 		Genode::log("unknown topic: ", (const char *)message->topic);
 	}
