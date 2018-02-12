@@ -29,9 +29,7 @@
 ## Prerequisites
 ### Build Walkthrough
 
-1. Follow the instructions under (skip the last step ```make jenkins_run```)
-
-https://argos-research.github.io/documentation/install.html#operating-system-on-local-machine
+1. Follow the instructions in the [documentation](https://argos-research.github.io/documentation/install.html#operating-system-on-local-machine) (skip the last step ```make jenkins_run```)
 
 2. Clone the genode-world under genode/repos (assuming you are in the operating-system directory)
 ```
@@ -68,7 +66,7 @@ REPOSITORIES += $(GENODE_DIR)/repos/genode-CarControl
 ```
 make -C build/genode-focnados_rpi app/servo_client app/mbl_client
 make -C build/genode-focnaods_panda app/servo_adapter app/mbl_adapter
-make -C build/genode-focnaods_pbxa9 app/savm
+make -C build/genode-focnaods_pbxa9 app/savm app/acc
 ```
 
 ## Run-time Instructions
