@@ -29,7 +29,8 @@ void savm::readAllBytes(void *buf, int socket, unsigned int size) {
 
 savm::savm(const char *id) : mosquittopp(id)
 {
-	sem_init(&allValSem, 0, 0);
+	sem_init(&allValSem, 0, 1);
+	sem_init(&allData, 0, 0);
 	mosqpp::lib_init();  /* initialize mosquitto library */
 
 	/* configure mosquitto library */
@@ -203,7 +204,7 @@ savm::savm(const char *id) : mosquittopp(id)
 		 ** CommandDataIn **
 		 *******************/
 		/* wait for data */
-		sem_wait(&allValSem);
+		sem_wait(&allData);
 
 		msg_len = 0;
 		std::string cdi_str;
@@ -270,10 +271,12 @@ void savm::on_message(const struct mosquitto_message *message)
 		return;
 	}
 
+	sem_wait(&allValSem);
 	allValues = (allValues + 1) % 7;
 	if (!allValues) {
-		sem_post(&allValSem);
+		sem_post(&allData);
 	}
+	sem_post(&allValSem);
 }
 
 void savm::on_connect(int rc)

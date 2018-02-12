@@ -19,6 +19,7 @@ class savm : public mosqpp::mosquittopp
 	protobuf::CommandDataIn cdi;
 	int allValues;
 	sem_t allValSem;
+	sem_t allData;
 
 	void on_connect(int rc);
 	void on_disconnect(int rc);
