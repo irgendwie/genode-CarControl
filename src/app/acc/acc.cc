@@ -11,7 +11,8 @@
 acc::acc(const char* id) : mosquittopp(id)
 {
 	/* initialization */
-	sem_init(&allValSem, 0, 0);
+	sem_init(&allValSem, 0, 1);
+	sem_init(&allData, 0, 0);
 	mosqpp::lib_init();
 
 	/* configure mosquitto library */
@@ -75,7 +76,7 @@ acc::acc(const char* id) : mosquittopp(id)
 	
 	while(true) {
 		/* wait till we get all data */
-		sem_wait(&allValSem);
+		sem_wait(&allData);
 
 		/* calculate commanddataout */
 		cdo = followDriving(this->sdi);
@@ -135,6 +136,7 @@ void acc::on_message(const struct mosquitto_message *message)
 		y = atof(strtok(NULL, ","));
 	}
 
+
 	/* fill sensorDataIn struct */
 	if (!strcmp(type, "isPositionTracked")) {
 		sdi.isPositionTracked = atoi(value);
@@ -166,10 +168,12 @@ void acc::on_message(const struct mosquitto_message *message)
 	}
 
 	/* check if we got all values */
+	sem_wait(&allValSem);
 	allValues = (allValues + 1) % 12;
 	if (!allValues) {
-		sem_post(&allValSem);
+		sem_post(&allData);
 	}
+	sem_post(&allValSem);
 }
 
 void acc::on_connect(int rc)
