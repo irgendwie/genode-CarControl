@@ -94,8 +94,8 @@ savm::savm(const char *id) : mosquittopp(id)
 	struct sockaddr_in srv_addr;
 	bzero(&srv_addr, sizeof(srv_addr));
 	srv_addr.sin_family = AF_INET;
-	srv_addr.sin_addr.s_addr = inet_addr("192.168.137.1");
-	srv_addr.sin_port = htons(9002);
+	srv_addr.sin_addr.s_addr = inet_addr(ip_addr);
+	srv_addr.sin_port = htons(port);
 
 	if ((sock = lwip_socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		Genode::error("socket failed: ", (const char *)strerror(errno));
