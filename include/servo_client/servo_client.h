@@ -7,7 +7,7 @@ private:
 	/* mosquitto */
 	char host[16];
 	const char* id = "servo_client";
-	const char* topic = "rcar/control/motor/#";
+	const char* topic = "rcar/control/servo/#";
 	int port;
 	int keepalive;
 
