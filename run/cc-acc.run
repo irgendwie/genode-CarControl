@@ -50,12 +50,8 @@ set config {
 	</start>
 	<start name="acc">
 		<resource name="RAM" quantum="5M"/>
-		<route>
-			<service name="Nic"> <child name="nic_bridge"/> </service>
-			<any-service> <parent/> <any-child/> </any-service>
-		</route>
 		<config>
-			<mosquitto ip-address="192.168.137.1" />
+			<mosquitto ip-address="10.200.32.75" />
 			<network dhcp="yes" />
 		</config>
 	</start>
@@ -128,6 +124,6 @@ append qemu_args " -net nic,macaddr=02:00:00:00:01:03 "
 append_if [have_spec x86]     qemu_args " -net nic,model=e1000 "
 append_if [have_spec lan9118] qemu_args " -net nic,model=lan9118 "
 
-append qemu_args " -net vde,sock=/tmp/switch "
+append qemu_args " -net vde,sock=/tmp/switch1 "
 
 run_genode_until forever
