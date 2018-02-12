@@ -26,7 +26,52 @@
 |   |   |   +-- ...
 ```
 
-## Instructions
+## Prerequisites
+### Build Walkthrough
+
+1. Follow the instructions under (skip the last step ```make jenkins_run```)
+
+https://argos-research.github.io/documentation/install.html#operating-system-on-local-machine
+
+2. Clone the genode-world under genode/repos (assuming you are in the operating-system directory)
+```
+git clone https://github.com/argos-research/genode-world.git genode/repos/genode-world
+cd genode/repos/genode-world
+git checkout protobuf_3.5.0
+```
+
+3. Clone this repository into genode/repos (assuming you are in the operating-system directory)
+```
+git clone https://github.com/dk87/genode-CarControl.git genode/repos/genode-CarControl
+```
+
+4. Create a build directory for a rpi, pbxa9 and a panda build
+```
+GENODE_TARGET=focnados_rpi make jenkins_build_dir
+GENODE_TARGET=focnados_panda make jenkins_build_dir
+GENODE_TARGET=focnados_pbxa9 make jenkins_build_dir
+```
+
+5. Edit the ```etc/build.conf``` in each build directory by adding the following lines
+```
+REPOSITORIES += $(GENODE_DIR)/repos/genode-world
+REPOSITORIES += $(GENODE_DIR)/repos/genode-CarControl
+```
+
+6. Prepare the missing ports by executing (again in operating-system directory)
+```
+./genode/tool/ports/prepare_port libmosquitto openssl libprotobuf
+```
+
+7. Trigger the compilation
+
+```
+make -C build/genode-focnados_rpi app/servo_client app/mbl_client
+make -C build/genode-focnaods_panda app/servo_adapter app/mbl_adapter
+make -C build/genode-focnaods_pbxa9 app/savm
+```
+
+## Run-time Instructions
 1. Use the `ACC` branch of speed-dreams [(ref.)](https://github.com/argos-research/speed-dreams/tree/ACC)
 2. Configure a race to consist of two bots, with the ACC driver in the second position
 3. Start a mosquitto server
