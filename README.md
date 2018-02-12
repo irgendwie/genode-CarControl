@@ -37,6 +37,10 @@ git clone https://github.com/argos-research/genode-world.git genode/repos/genode
 cd genode/repos/genode-world
 git checkout protobuf_3.5.0
 ```
+2.1 Clone the pololu Servo Controller
+```
+git clone https://github.com/argos-research/genode-pololuServoController.git genode/repos/genode-pololuServoController
+```
 
 3. Clone this repository into genode/repos (assuming you are in the operating-system directory)
 ```
@@ -54,6 +58,7 @@ GENODE_TARGET=focnados_pbxa9 make jenkins_build_dir
 ```
 REPOSITORIES += $(GENODE_DIR)/repos/genode-world
 REPOSITORIES += $(GENODE_DIR)/repos/genode-CarControl
+REPOSITORIES += $(GENODE_DIR)/repos/genode-pololuServoController
 ```
 
 6. Prepare the missing ports by executing (again in operating-system directory)
@@ -65,8 +70,8 @@ REPOSITORIES += $(GENODE_DIR)/repos/genode-CarControl
 
 ```
 make -C build/genode-focnados_rpi app/servo_client app/mbl_client
-make -C build/genode-focnaods_panda app/servo_adapter app/mbl_adapter
-make -C build/genode-focnaods_pbxa9 app/savm app/acc
+make -C build/genode-focnados_panda app/servo_adapter app/mbl_adapter
+make -C build/genode-focnados_pbxa9 app/savm app/acc
 ```
 
 ## Run-time Instructions
