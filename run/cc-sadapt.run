@@ -48,7 +48,7 @@ set config {
 		<any-service> <parent/> <any-child/> </any-service>
 	</default-route>
 
-	<start name="net_servo_adapter">
+	<start name="servo_adapter">
 		<resource name="RAM" quantum="4M"/>
 		<config>
 			<network dhcp="yes" ip-address="192.168.100.42" subnet-mask="255.255.255.0" default-gateway="192.168.100.254" />
