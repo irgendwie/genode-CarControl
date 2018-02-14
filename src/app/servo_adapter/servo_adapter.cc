@@ -115,9 +115,11 @@ void servo_adapter::on_message(const struct mosquitto_message *message)
 		Genode::log("unknown topic: ", (const char *)message->topic);
 	}
 
-	if (!(rbrake %= 2)) {
+	/* check if we got both values for the brake */
+	if (rbrake == 2) {
 		snprintf(buffer, sizeof(buffer), "%d", transform_brake((brakeRL + brakeRR) / 2));
 		publish(NULL, "rcar/control/servo/brake/r", strlen(buffer), buffer);
+		rbrake = 0;
 	}
 }
 

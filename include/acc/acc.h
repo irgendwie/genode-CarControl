@@ -8,7 +8,7 @@ class acc : public mosqpp::mosquittopp
 	/* mosquitto */
 	char host[16];
 	const char* id = "acc";
-	const char* topic = "savm/car/0/#";
+	const char* topic = "savm/car/0/+";
 	int port;
 	int keepalive;
 	enum {
@@ -23,6 +23,7 @@ class acc : public mosqpp::mosquittopp
 	float g_maxBrake = 1.0;
 	int allValues;
 	sem_t allValSem;
+	sem_t allData;
 	struct SensorDataIn sdi;
 
 public:
