@@ -71,7 +71,7 @@ append_if $use_usb_driver config {
 			<service name="Nic"/>
 		</provides>
 		<config ehci="yes">
-			<nic mac="02:00:00:00:01:01" />
+			<nic mac="0A:02:00:00:00:03" />
 			<raw>
 				<policy label="usb_terminal -> usb_serial" vendor_id="0x67b" product_id="0x2303"/>
 			</raw>
@@ -99,7 +99,7 @@ install_config $config
 # generic modules
 set boot_modules {
 	core init timer
-	ld.lib.so libc.lib.so lwip.lib.so libm.lib.so libmosquitto.lib.so pthread.lib.so stdcxx.lib.so libssl.lib.so libcrypto.lib.so libprotobuf.lib.so zlib.lib.so
+	ld.lib.so libc.lib.so lwip.lib.so libm.lib.so libmosquitto.lib.so pthread.lib.so stdcxx.lib.so libssl.lib.so libcrypto.lib.so 
 	acc 
 }
 

@@ -112,7 +112,7 @@ void servo_adapter::on_message(const struct mosquitto_message *message)
 		brakeRR = atof(value);
 		rbrake++;
 	} else {
-		Genode::log("unknown topic: ", (const char *)message->topic);
+	  //Genode::log("unknown topic: ", (const char *)message->topic);
 	}
 
 	/* check if we got both values for the brake */
