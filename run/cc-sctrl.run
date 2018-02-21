@@ -76,7 +76,7 @@ set config {
                 <service name="Usb"/>
         </provides>
         <config uhci="yes" ehci="yes" xhci="yes">
-            <nic mac="0A:03:00:00:00:02"/>
+            <nic mac="0A:03:00:00:00:01"/>
 	    <raw>
 		<policy label="usb_terminal -> usb_serial" vendor_id="0x67b" product_id="0x2303"/>
             </raw>
