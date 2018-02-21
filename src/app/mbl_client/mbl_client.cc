@@ -8,9 +8,9 @@
 
 mbl_client::mbl_client(const char* id) : mosquittopp(id)
 {
-    /* initialize roboteq core api */
+    	/* initialize roboteq core api */
 	CoreAPI c_api(CONNECTION_COM);
-    CoreAPI * _core = &c_api;
+    	_core = &c_api;
 
 	mosqpp::lib_init();  /* initialize mosquitto library */
 
@@ -71,7 +71,7 @@ void mbl_client::on_message(const struct mosquitto_message *message)
 
 	if (!strcmp(type, "powerpct")) {
 		unsigned int powerpct = atoi(value);
-        _core->SetMotorSpeedAbs(powerpct);
+        	_core->SetMotorSpeedAbs(powerpct);
 	} else {
 		Genode::log("unknown topic: ", (const char *)message->topic);
 	}
