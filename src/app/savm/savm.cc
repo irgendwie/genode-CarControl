@@ -123,13 +123,14 @@ savm::savm(const char *id) : mosquittopp(id)
 	protobuf::SensorDataOut sdo;
 	protobuf::SensorDataOut_vec2 vec2;
 	char val[512] = { 0 };
-	int num = 0;
+	uint32_t msg_len = 0;
+	std::string cdi_str;
+	char buffer[1024] = { 0 };
 	while(true) {
-		uint32_t msg_len;
 		readAllBytes(&msg_len, sock, sizeof(msg_len));
 		msg_len = ntohl(msg_len);
 
-		char buffer[msg_len] = { '\0' };
+		buffer[msg_len] = { '\0' };
 		readAllBytes(buffer, sock, msg_len);
 
 		/*******************
@@ -206,23 +207,16 @@ savm::savm(const char *id) : mosquittopp(id)
 		/* wait for data */
 		sem_wait(&allData);
 
-		msg_len = 0;
-		std::string cdi_str;
-		cdi.SerializeToString(&cdi_str);
-		msg_len = htonl(cdi_str.size());
+		/* prepare message */
+		cdi_str.clear();                       // clear cdi_str
+		msg_len = htonl(cdi.ByteSizeLong());   // get cdi length in bytes (network byte order)
+		cdi_str.append((const char*)&msg_len,
+					   sizeof(msg_len));       // append message length
+		cdi.AppendToString(&cdi_str);          // append cdi
+		msg_len = cdi_str.size();              // get #bytes to transmit
 
-		int ret = lwip_write(sock, &msg_len, sizeof(msg_len));
-		msg_len = ntohl(msg_len);
-		if (ret == -1) {
-			Genode::error("write length failed! %s", (const char *)strerror(errno));
-		} else if (ret != sizeof(msg_len)) {
-			Genode::error("write length failed to send complete message! ",
-						  ret,
-						  " vs. ",
-						  sizeof(msg_len));
-		}
-
-		ret = lwip_write(sock, cdi_str.c_str(), msg_len);
+		/* send message */
+		int ret = lwip_write(sock, cdi_str.c_str(), msg_len);
 		if (ret == -1) {
 			Genode::error("write cdi failed! ", (const char *)strerror(errno));
 		} else if ((unsigned int)ret < msg_len) {
@@ -231,9 +225,6 @@ savm::savm(const char *id) : mosquittopp(id)
 						  " vs. ",
 						  msg_len);
 		}
-
-		num++;
-		//Genode::log("successful loop number: ", num);
 	}
 }
 
