@@ -5,9 +5,6 @@
 #include <string.h>
 #include <errno.h>
 
-/* fix redefinition of struct timeval */
-#define timeval _timeval
-
 extern "C" {
 #include <lwip/sockets.h>
 }

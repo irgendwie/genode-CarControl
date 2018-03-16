@@ -115,7 +115,7 @@ acc::~acc() {
  * \param type  value name
  * \param value value as string
  */
-void acc::myPublish(char *type, char *value) {
+void acc::myPublish(const char *type, const char *value) {
 	char topic[1024];
 	strcpy(topic, "ecu/acc/");
 	strncat(topic, type, sizeof(topic));
@@ -130,7 +130,7 @@ void acc::on_message(const struct mosquitto_message *message)
 	char *value = (char *)message->payload;
 
 	/* split x,y into two separate values */
-	float x, y;
+	float x = 0.0, y = 0.0;
 	if (strstr(value, ",")) {
 		x = atof(strtok(value, ","));
 		y = atof(strtok(NULL, ","));
@@ -270,7 +270,7 @@ CommandDataOut acc::followDriving(SensorDataIn sd)
 	float lspeed = sd.leadSpeed; // speed of leading car
 
 	// adjusted distance to account for different speed, but keep it positive so brake command will not be issued if leading speed is too high
-	float adist = std::max<float>(0.1, g_followDist + (fspeed - lspeed));
+	//float adist = std::max<float>(0.1, g_followDist + (fspeed - lspeed));
 
 	// Accel gets bigger if we are further away from the leading car
 	// Accel goes to zero if we are at the target distance from the leading car

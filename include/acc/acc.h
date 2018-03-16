@@ -35,5 +35,5 @@ private:
 	void on_message(const struct mosquitto_message *message);
 	int getSpeedDepGear(float speed, int currentGear);
 	CommandDataOut followDriving(SensorDataIn sd);
-	void myPublish(char *type, char *value);
+	void myPublish(const char *type, const char *value);
 };

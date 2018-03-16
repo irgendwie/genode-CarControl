@@ -16,7 +16,7 @@
 using namespace std;
 #define BUFFER_SIZE 1024
 
-ComAPI::ComAPI(int ConnectionType) : timer(), terminal(), SeriellToCan()
+ComAPI::ComAPI(int ConnectionType) : SeriellToCan(), terminal(), timer()
 {
     handle = RQ_INVALID_HANDLE;
     ComAPI::ConnectionType = ConnectionType;

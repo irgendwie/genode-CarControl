@@ -60,7 +60,7 @@ servo_client::~servo_client()
 void servo_client::on_message(const struct mosquitto_message *message)
 {
 	/* split type from topic */
-	char *type = strrchr(message->topic, '/') + 1;
+	//char *type = strrchr(message->topic, '/') + 1;
 	/* get pointer to payload for convenience */
 	char *value = (char *)message->payload;
 
