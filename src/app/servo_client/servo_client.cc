@@ -1,16 +1,19 @@
 #include <servo_client/servo_client.h>
 #include <base/log.h>
 #include <util/xml_node.h>
-#include <os/config.h>
 #include <string.h>
 #include <errno.h>
+#include <base/attached_rom_dataspace.h>
+#include <libc/component.h>
 
-servo_client::servo_client(const char* id) : mosquittopp(id)
+servo_client::servo_client(const char* id, Libc::Env &_env) : mosquittopp(id)
 {
 	mosqpp::lib_init();  /* initialize mosquitto library */
 
 	/* configure mosquitto library */
-	Genode::Xml_node mosquitto = Genode::config()->xml_node().sub_node("mosquitto");
+	Genode::Attached_rom_dataspace _config(_env, "config");
+	/* get config */
+	Genode::Xml_node mosquitto = _config.xml().sub_node("mosquitto");
 	try {
 		mosquitto.attribute("ip-address").value(this->host, sizeof(host));
 	} catch(Genode::Xml_node::Nonexistent_attribute) {
