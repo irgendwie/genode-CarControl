@@ -1,6 +1,5 @@
 #include <base/component.h>
 #include <util/xml_node.h>
-#include <os/config.h>
 #include <acc/acc.h>
 #include <nic/packet_allocator.h>
 #include <lwip/genode.h>
@@ -9,14 +8,17 @@ extern "C" {
 	#include <lwip/sockets.h>
 	#include <lwip/api.h>
 }
+#include <base/attached_rom_dataspace.h>
+#include <libc/component.h>
 
 Genode::size_t Component::stack_size() { return 64*1024; }
 
-void Component::construct(Genode::Env &)
+void Libc::Component::construct(Libc::Env &env)
 {
 	enum { BUF_SIZE = Nic::Packet_allocator::DEFAULT_PACKET_SIZE * 128 };
 
-	Genode::Xml_node network = Genode::config()->xml_node().sub_node("network");
+	Genode::Attached_rom_dataspace _config(env, "config");
+	Genode::Xml_node network = _config.xml().sub_node("network");
 
 	if (network.attribute_value<bool>("dhcp", true)) {
 		if (lwip_nic_init(0,
@@ -41,5 +43,5 @@ void Component::construct(Genode::Env &)
 		}
 	}
 
-	servo_client servo_client("servo_client");
+	servo_client servo_client("servo_client",env);
 }

@@ -1,4 +1,5 @@
 #include <mosquittopp.h>
+#include <libc/component.h>
 
 class mbl_adapter : public mosqpp::mosquittopp
 {
@@ -22,6 +23,6 @@ private:
 	void on_message(const struct mosquitto_message *message);
 
 public:
-	mbl_adapter(const char* id);
+	mbl_adapter(const char* id, Libc::Env &_env);
 	~mbl_adapter();
 };

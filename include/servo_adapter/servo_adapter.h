@@ -1,4 +1,5 @@
 #include <mosquittopp.h>
+#include <libc/component.h>
 
 class servo_adapter : public mosqpp::mosquittopp
 {
@@ -25,6 +26,6 @@ private:
 	float brakeRR;
 
 public:
-	servo_adapter(const char* id);
+	servo_adapter(const char* id, Libc::Env &_env);
 	~servo_adapter();
 };

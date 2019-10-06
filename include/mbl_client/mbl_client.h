@@ -1,5 +1,6 @@
 #include <mosquittopp.h>
 #include <ecu_api/CoreAPI.h>
+#include <libc/component.h>
 
 class mbl_client : public mosqpp::mosquittopp
 {
@@ -18,6 +19,6 @@ private:
         CoreAPI * _core;
 
 public:
-	mbl_client(const char* id);
+	mbl_client(const char* id, Libc::Env &_env);
 	~mbl_client();
 };

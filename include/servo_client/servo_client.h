@@ -1,5 +1,6 @@
 #include <mosquittopp.h>
 #include <servo_controller_session/connection.h>
+#include <libc/component.h>
 
 class servo_client : public mosqpp::mosquittopp
 {
@@ -23,6 +24,6 @@ private:
 	Servo_Controller::Connection servo_controller;
 
 public:
-	servo_client(const char* id);
+	servo_client(const char* id, Libc::Env &_env);
 	~servo_client();
 };

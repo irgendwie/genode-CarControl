@@ -85,7 +85,7 @@ make -C build/genode-focnados_pbxa9 app/savm app/acc
 
 ## Flow Diagram
 ### General
-![flow_diagram.png](https://github.com/irgendwie/genode-CarControl/raw/master/flow_diagram.png)
+![flow_diagram.svg](https://raw.githubusercontent.com/privatereese/genode-CarControl/master/flow_diagram.svg?sanitize=true)
 
 ### Additional information
 - SpeedDreams uses the `9002` port by default and acts as a server
